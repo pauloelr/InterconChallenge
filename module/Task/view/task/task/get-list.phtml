@@ -1,0 +1,37 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1>Lista de Tarefas</h1>
+        <?php if(count($this->collection) > 0):?>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Titulo</th>
+                        <th>Opções</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php /** @var $rowTask \Intercon\Challenge\Task\Entity\Task  */ ?>
+                    <?php foreach ($this->collection as $rowTask):?>
+                        <tr class="<?=$rowTask->getStatus() == 'done' ? 'success' : 'danger';?>">
+                            <td><span data-toggle="tooltip" data-placement="top" title="<?php echo $rowTask->getDescription()?>"><?php echo $rowTask->getTitle()?></span></td>
+                            <td>
+                                <?php if($rowTask->getStatus() == 'done'): ?>
+                                    <a class="btn btn-warning" role="button" href="<?php echo $this->url('task/todo', array('id' => $rowTask->getId()));?>">Desmarcar</a>
+                                <?php else: ?>
+                                    <a class="btn btn-success" role="button" href="<?php echo $this->url('task/complete', array('id' => $rowTask->getId()));?>">Completar</a>
+                                <?php endif; ?>
+                                <a class="btn btn-info" role="button" href="<?php echo $this->url('task/edit', array('id' => $rowTask->getId()));?>">Editar</a>
+                                <a class="btn btn-danger" role="button" href="<?php echo $this->url('task/delete', array('id' => $rowTask->getId()));?>">Excluir</a>
+                            </td>
+                        </tr>
+                    <?php endforeach;?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <p>Nenhuma Tarefa Encontrada</p>
+        <?php endif; ?>
+    </div>
+</div>
+

@@ -1,0 +1,55 @@
+{
+    "name": "intercon/challenge",
+    "description": "Intercon Challenge",
+    "keywords": [
+        "Zend Framework 2",
+        "Intercon Challenge",
+        "To-do Application"
+    ],
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "evandotpro/edp-rest-method-map",
+                "version": "master",
+                "source": {
+                    "url": "https://github.com/EvanDotPro/EdpRestMethodMap.git",
+                    "type": "git",
+                    "reference":"master"
+                },
+                "autoload": {
+                    "classmap": ["/"]
+                }
+            }
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "zendframework/zendframework": "2.*",
+        "doctrine/doctrine-orm-module": "0.*",
+        "neilime/zf2-twb-bundle": "2.*@stable",
+        "evandotpro/edp-rest-method-map": "master@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "mockery/mockery": "dev-master@dev",
+
+        "behat/behat": "2.4.*@stable",
+        "behat/mink": "1.4.*@stable",
+        "behat/mink-extension": "*",
+        "behat/mink-goutte-driver": "*",
+        "behat/mink-selenium2-driver": "*",
+
+        "zendframework/zftool": "dev-master",
+        "zendframework/zend-developer-tools": "dev-master",
+        "hounddog/doctrine-data-fixture-module": "dev-master@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Intercon\\Challenge\\Application\\": "module/Application/src",
+            "Intercon\\Challenge\\Task\\": "module/Task/src"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

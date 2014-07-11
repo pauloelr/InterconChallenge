@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <?php echo $this->headScript()->prependFile($this->basePath() . 'components/platform/platform.js') ?>
+        <?php echo $this->headLink(array('rel' => 'import', 'href' => $this->basePath() . '/elements/interconphp-todo.html'))?>
+    </head>
+    <body fullbleed unresolved>
+        <interconphp-todo></interconphp-todo>
+    </body>
+</html>

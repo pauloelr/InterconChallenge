@@ -1,0 +1,49 @@
+<?php echo $this->doctype(); ?>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <?php echo $this->headTitle('PHPSP - To-do')->setSeparator(' - ')->setAutoEscape(false) ?>
+
+        <?php echo $this->headMeta()->appendName('viewport', 'width=device-width, initial-scale=1.0') ?>
+
+        <?php echo $this->headLink()
+            ->prependStylesheet('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
+            ->prependStylesheet('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css') ?>
+
+        <!-- Scripts -->
+        <?php echo $this->headScript()
+            ->prependFile('//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
+            ->prependFile('//code.jquery.com/jquery-2.1.1.min.js') ?>
+
+        <script type='text/javascript'>
+            $(document).ready(function () {
+                $("[data-toggle=tooltip]").tooltip();
+            });
+        </script>
+    </head>
+    <body>
+        <nav class="navbar navbar-default" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Abrir Navegação</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Intercon Challenge To-do</a>
+                </div>
+
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li><a href="<?php echo $this->url('task');?>">Lista de Tarefas</a></li>
+                        <li><a href="<?php echo $this->url('task/add');?>">Adcionar Tarefa</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="container">
+            <?php echo $this->content; ?>
+        </div>
+    </body>
+</html>

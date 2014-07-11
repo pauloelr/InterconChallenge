@@ -1,0 +1,12 @@
+<?php $this->form->setAttribute('action', $this->url('task')); ?>
+<div class="row">
+    <div class="col-md-12">
+        <h1>Cadastro de Tarefas</h1>
+        <?php
+        $this->form->prepare();
+        echo $this->form()->openTag($this->form);
+        echo $this->formCollection($this->form);
+        echo $this->form()->closeTag();
+        ?>
+    </div>
+</div>

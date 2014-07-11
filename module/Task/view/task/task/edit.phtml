@@ -1,0 +1,16 @@
+<?php $id = $this->form->get('Task')->get('id')->getValue();?>
+<?php $this->form->setAttribute('action', $this->url('task/resource', array('id' => $id))); ?>
+<div class="row">
+    <div class="col-md-12">
+        <h1>Edição de Tarefa</h1>
+        <?php
+            $this->form->prepare();
+            echo $this->form()->openTag($this->form);
+            ?>
+            <input type="hidden" name="_method" value="put">
+            <?php
+            echo $this->formCollection($this->form);
+            echo $this->form()->closeTag();
+        ?>
+    </div>
+</div>
