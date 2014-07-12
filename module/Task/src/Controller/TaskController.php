@@ -44,9 +44,10 @@ class TaskController extends AbstractRestfulController
 
     public function update($id, $data)
     {
-        try {
-            $task = $this->taskMapper->find($id);
-        } catch (\Exception $ex) {
+        /** @var \Intercon\Challenge\Task\Entity\Task $task */
+        $task = $this->taskMapper->find($id);
+
+        if (!$task) {
             $this->flashMessenger()->setNamespace('success')
                 ->addMessage('Tarefa não encontrada');
 
@@ -71,9 +72,10 @@ class TaskController extends AbstractRestfulController
 
     public function delete($id)
     {
-        try {
-            $task = $this->taskMapper->find($id);
-        } catch (\Exception $ex) {
+        /** @var \Intercon\Challenge\Task\Entity\Task $task */
+        $task = $this->taskMapper->find($id);
+
+        if (!$task) {
             $this->flashMessenger()->setNamespace('success')
                 ->addMessage('Tarefa não encontrada');
 
@@ -98,9 +100,10 @@ class TaskController extends AbstractRestfulController
     {
         $id = (int) $this->params()->fromRoute('id', 0);
 
-        try {
-            $task = $this->taskMapper->find($id);
-        } catch (\Exception $ex) {
+        /** @var \Intercon\Challenge\Task\Entity\Task $task */
+        $task = $this->taskMapper->find($id);
+
+        if (!$task) {
             $this->flashMessenger()->setNamespace('success')
                 ->addMessage('Tarefa não encontrada');
 
@@ -117,9 +120,10 @@ class TaskController extends AbstractRestfulController
     {
         $id = (int) $this->params()->fromRoute('id', 0);
 
-        try {
-            $this->taskMapper->find($id);
-        } catch (\Exception $ex) {
+        /** @var \Intercon\Challenge\Task\Entity\Task $task */
+        $task = $this->taskMapper->find($id);
+
+        if (!$task) {
             $this->flashMessenger()->setNamespace('success')
                 ->addMessage('Tarefa não encontrada');
 
@@ -132,9 +136,10 @@ class TaskController extends AbstractRestfulController
     public function completeAction(){
         $id = (int) $this->params()->fromRoute('id', 0);
 
-        try {
-            $task = $this->taskMapper->find($id);
-        } catch (\Exception $ex) {
+        /** @var \Intercon\Challenge\Task\Entity\Task $task */
+        $task = $this->taskMapper->find($id);
+
+        if (!$task) {
             $this->flashMessenger()->setNamespace('success')
                 ->addMessage('Tarefa não encontrada');
 
@@ -142,7 +147,6 @@ class TaskController extends AbstractRestfulController
         }
 
         $task->setStatus('done');
-
         $this->taskMapper->update($task);
 
         $this->flashMessenger()->setNamespace('success')
@@ -154,9 +158,10 @@ class TaskController extends AbstractRestfulController
     public function todoAction(){
         $id = (int) $this->params()->fromRoute('id', 0);
 
-        try {
-            $task = $this->taskMapper->find($id);
-        } catch (\Exception $ex) {
+        /** @var \Intercon\Challenge\Task\Entity\Task $task */
+        $task = $this->taskMapper->find($id);
+
+        if (!$task) {
             $this->flashMessenger()->setNamespace('success')
                 ->addMessage('Tarefa não encontrada');
 
@@ -166,7 +171,6 @@ class TaskController extends AbstractRestfulController
         $task->setStatus('todo');
 
         $this->taskMapper->update($task);
-
         $this->flashMessenger()->setNamespace('success')
             ->addMessage('Tarefa editada com sucesso');
 

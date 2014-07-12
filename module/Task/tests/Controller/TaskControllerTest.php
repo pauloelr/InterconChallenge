@@ -80,7 +80,7 @@ class TaskControllerTest extends \PHPUnit_Framework_TestCase
     public function testUpdateRedirectIfTaskDoesNotExist()
     {
         $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
-        $taskMapper->shouldReceive('find')->with(1)->once()->andThrow('\Exception');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturnNull();
 
         $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
 
@@ -176,7 +176,7 @@ class TaskControllerTest extends \PHPUnit_Framework_TestCase
     public function testDeleteRedirectIfTaskDoesNotExist()
     {
         $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
-        $taskMapper->shouldReceive('find')->with(1)->once()->andThrow('\Exception');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturnNull();
 
         $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
 
@@ -264,7 +264,7 @@ class TaskControllerTest extends \PHPUnit_Framework_TestCase
     public function testEditActionRedirectIfTaskDoesNotExist()
     {
         $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
-        $taskMapper->shouldReceive('find')->with(1)->once()->andThrow('\Exception');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturnNull();
 
         $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
 
@@ -341,7 +341,7 @@ class TaskControllerTest extends \PHPUnit_Framework_TestCase
     public function testDeleteActionRedirectIfTaskDoesNotExist()
     {
         $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
-        $taskMapper->shouldReceive('find')->with(1)->once()->andThrow('\Exception');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturnNull();
 
         $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
 
@@ -412,6 +412,192 @@ class TaskControllerTest extends \PHPUnit_Framework_TestCase
 
         $expected = array('id' => 1);
         $this->assertEquals($expected, $taskController->deleteAction());
+    }
+
+    public function testCompleteActionRedirectIfTaskDoesNotExist()
+    {
+        $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturnNull();
+
+        $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
+
+        /** @var $taskMapper \Intercon\Challenge\Task\Repository\TaskRepository */
+        /** @var $taskForm \Intercon\Challenge\Task\Form\TaskForm */
+        $taskController = new TaskController($taskMapper, $taskForm);
+
+        $pluginManager = \Mockery::mock('Zend\Mvc\Controller\PluginManager');
+        $pluginManager->shouldReceive('setController')->andReturn(\Mockery::self());
+
+        $paramPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Params');
+        $paramPlugin->shouldReceive('__invoke')->once()->andReturn(\Mockery::self());
+        $paramPlugin->shouldReceive('fromRoute')->once()->andReturn(1);
+
+        $pluginManager->shouldReceive('get')
+            ->with('params', \Mockery::any())
+            ->andReturn($paramPlugin)
+            ->once();
+
+        $flashMessenger = \Mockery::mock('Zend\Mvc\Controller\Plugin\FlashMessenger');
+        $flashMessenger->shouldReceive('setNamespace')->once()->andReturn(\Mockery::self());
+        $flashMessenger->shouldReceive('addMessage')->once()->andReturn(\Mockery::self());
+
+        $pluginManager->shouldReceive('get')
+            ->with('flashMessenger', \Mockery::any())
+            ->andReturn($flashMessenger)
+            ->once();
+
+        $redirectPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Redirect');
+        $redirectPlugin->shouldReceive('toRoute')->once()->andReturn('redirect');
+
+        $pluginManager->shouldReceive('get')
+            ->with('redirect', \Mockery::any())
+            ->andReturn($redirectPlugin)
+            ->once();
+
+        /** @var $pluginManager \Zend\Mvc\Controller\PluginManager */
+        $taskController->setPluginManager($pluginManager);
+
+        $this->assertEquals('redirect', $taskController->completeAction());
+    }
+
+    public function testCompleteActionRedirectIfTaskExist()
+    {
+        $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturn($this->getRowsetTask()[0]);
+        $taskMapper->shouldReceive('update')->once()->andReturnNull();
+
+        $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
+
+        /** @var $taskMapper \Intercon\Challenge\Task\Repository\TaskRepository */
+        /** @var $taskForm \Intercon\Challenge\Task\Form\TaskForm */
+        $taskController = new TaskController($taskMapper, $taskForm);
+
+        $pluginManager = \Mockery::mock('Zend\Mvc\Controller\PluginManager');
+        $pluginManager->shouldReceive('setController')->andReturn(\Mockery::self());
+
+        $paramPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Params');
+        $paramPlugin->shouldReceive('__invoke')->once()->andReturn(\Mockery::self());
+        $paramPlugin->shouldReceive('fromRoute')->once()->andReturn(1);
+
+        $pluginManager->shouldReceive('get')
+            ->with('params', \Mockery::any())
+            ->andReturn($paramPlugin)
+            ->once();
+
+        $flashMessenger = \Mockery::mock('Zend\Mvc\Controller\Plugin\FlashMessenger');
+        $flashMessenger->shouldReceive('setNamespace')->once()->andReturn(\Mockery::self());
+        $flashMessenger->shouldReceive('addMessage')->once()->andReturn(\Mockery::self());
+
+        $pluginManager->shouldReceive('get')
+            ->with('flashMessenger', \Mockery::any())
+            ->andReturn($flashMessenger)
+            ->once();
+
+        $redirectPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Redirect');
+        $redirectPlugin->shouldReceive('toRoute')->once()->andReturn('redirect');
+
+        $pluginManager->shouldReceive('get')
+            ->with('redirect', \Mockery::any())
+            ->andReturn($redirectPlugin)
+            ->once();
+
+        /** @var $pluginManager \Zend\Mvc\Controller\PluginManager */
+        $taskController->setPluginManager($pluginManager);
+
+        $this->assertEquals('redirect', $taskController->completeAction());
+    }
+
+    public function testTodoActionRedirectIfTaskDoesNotExist()
+    {
+        $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturnNull();
+
+        $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
+
+        /** @var $taskMapper \Intercon\Challenge\Task\Repository\TaskRepository */
+        /** @var $taskForm \Intercon\Challenge\Task\Form\TaskForm */
+        $taskController = new TaskController($taskMapper, $taskForm);
+
+        $pluginManager = \Mockery::mock('Zend\Mvc\Controller\PluginManager');
+        $pluginManager->shouldReceive('setController')->andReturn(\Mockery::self());
+
+        $paramPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Params');
+        $paramPlugin->shouldReceive('__invoke')->once()->andReturn(\Mockery::self());
+        $paramPlugin->shouldReceive('fromRoute')->once()->andReturn(1);
+
+        $pluginManager->shouldReceive('get')
+            ->with('params', \Mockery::any())
+            ->andReturn($paramPlugin)
+            ->once();
+
+        $flashMessenger = \Mockery::mock('Zend\Mvc\Controller\Plugin\FlashMessenger');
+        $flashMessenger->shouldReceive('setNamespace')->once()->andReturn(\Mockery::self());
+        $flashMessenger->shouldReceive('addMessage')->once()->andReturn(\Mockery::self());
+
+        $pluginManager->shouldReceive('get')
+            ->with('flashMessenger', \Mockery::any())
+            ->andReturn($flashMessenger)
+            ->once();
+
+        $redirectPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Redirect');
+        $redirectPlugin->shouldReceive('toRoute')->once()->andReturn('redirect');
+
+        $pluginManager->shouldReceive('get')
+            ->with('redirect', \Mockery::any())
+            ->andReturn($redirectPlugin)
+            ->once();
+
+        /** @var $pluginManager \Zend\Mvc\Controller\PluginManager */
+        $taskController->setPluginManager($pluginManager);
+
+        $this->assertEquals('redirect', $taskController->todoAction());
+    }
+
+    public function testTodoActionRedirectIfTaskExist()
+    {
+        $taskMapper = \Mockery::mock('Intercon\Challenge\Task\Repository\TaskRepository');
+        $taskMapper->shouldReceive('find')->with(1)->once()->andReturn($this->getRowsetTask()[0]);
+        $taskMapper->shouldReceive('update')->once()->andReturnNull();
+
+        $taskForm = \Mockery::mock('Intercon\Challenge\Task\Form\TaskForm');
+
+        /** @var $taskMapper \Intercon\Challenge\Task\Repository\TaskRepository */
+        /** @var $taskForm \Intercon\Challenge\Task\Form\TaskForm */
+        $taskController = new TaskController($taskMapper, $taskForm);
+
+        $pluginManager = \Mockery::mock('Zend\Mvc\Controller\PluginManager');
+        $pluginManager->shouldReceive('setController')->andReturn(\Mockery::self());
+
+        $paramPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Params');
+        $paramPlugin->shouldReceive('__invoke')->once()->andReturn(\Mockery::self());
+        $paramPlugin->shouldReceive('fromRoute')->once()->andReturn(1);
+
+        $pluginManager->shouldReceive('get')
+            ->with('params', \Mockery::any())
+            ->andReturn($paramPlugin)
+            ->once();
+
+        $flashMessenger = \Mockery::mock('Zend\Mvc\Controller\Plugin\FlashMessenger');
+        $flashMessenger->shouldReceive('setNamespace')->once()->andReturn(\Mockery::self());
+        $flashMessenger->shouldReceive('addMessage')->once()->andReturn(\Mockery::self());
+
+        $pluginManager->shouldReceive('get')
+            ->with('flashMessenger', \Mockery::any())
+            ->andReturn($flashMessenger)
+            ->once();
+
+        $redirectPlugin = \Mockery::mock('Zend\Mvc\Controller\Plugin\Redirect');
+        $redirectPlugin->shouldReceive('toRoute')->once()->andReturn('redirect');
+
+        $pluginManager->shouldReceive('get')
+            ->with('redirect', \Mockery::any())
+            ->andReturn($redirectPlugin)
+            ->once();
+
+        /** @var $pluginManager \Zend\Mvc\Controller\PluginManager */
+        $taskController->setPluginManager($pluginManager);
+
+        $this->assertEquals('redirect', $taskController->todoAction());
     }
 
     private function getRowsetTask()
