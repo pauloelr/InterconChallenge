@@ -6,4 +6,6 @@ Feature: Tasks Page
 
   Scenario: View the index page
     When I go to "/"
-    Then I should see "Tasks"
+    Then I should see "Lista de Tarefas"
+    And I should see "Apresentar a Aplicação"
+    And I should see "Criar a Aplicação"
