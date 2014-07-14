@@ -389,16 +389,15 @@ if hash_key_equals($apache_values, 'install', 1) {
   include puphpet::params
   include apache::params
 
-  $webroot_location = $puphpet::params::apache_webroot_location
+  $webroot_location      = $puphpet::params::apache_webroot_location
+  $apache_provider_types = ['virtualbox', 'vmware_fusion', 'vmware_desktop', 'parallels']
 
   exec { "exec mkdir -p ${webroot_location}":
     command => "mkdir -p ${webroot_location}",
     creates => $webroot_location,
   }
 
-  if (downcase($::provisioner_type) in ['virtualbox', 'vmware_fusion'])
-    and ! defined(File[$webroot_location])
-  {
+  if (downcase($::provisioner_type) in $apache_provider_types) and ! defined(File[$webroot_location]) {
     file { $webroot_location:
       ensure  => directory,
       mode    => 0775,
@@ -407,11 +406,7 @@ if hash_key_equals($apache_values, 'install', 1) {
         Group['www-data']
       ]
     }
-  }
-
-  if !(downcase($::provisioner_type) in ['virtualbox', 'vmware_fusion'])
-    and ! defined(File[$webroot_location])
-  {
+  } elsif ! (downcase($::provisioner_type) in $apache_provider_types) and ! defined(File[$webroot_location]) {
     file { $webroot_location:
       ensure  => directory,
       group   => 'www-data',
@@ -441,8 +436,8 @@ if hash_key_equals($apache_values, 'install', 1) {
   }
 
   if $::operatingsystem == 'ubuntu'
-  and hash_key_equals($php_values, 'install', 1)
-  and hash_key_equals($php_values, 'version', 55)
+    and hash_key_equals($php_values, 'install', 1)
+    and hash_key_equals($php_values, 'version', 55)
   {
     $apache_version = '2.4'
   } else {
@@ -496,7 +491,7 @@ if hash_key_equals($apache_values, 'install', 1) {
         creates => $vhost['docroot'],
       }
 
-      if (downcase($::provisioner_type) in ['virtualbox', 'vmware_fusion'])
+      if (downcase($::provisioner_type) in $apache_provider_types)
         and ! defined(File[$vhost['docroot']])
       {
         file { $vhost['docroot']:
@@ -504,9 +499,7 @@ if hash_key_equals($apache_values, 'install', 1) {
           mode    => 0765,
           require => Exec["exec mkdir -p ${vhost['docroot']} @ key ${key}"]
         }
-      }
-
-      if !(downcase($::provisioner_type) in ['virtualbox', 'vmware_fusion'])
+      } elsif !(downcase($::provisioner_type) in $apache_provider_types)
         and ! defined(File[$vhost['docroot']])
       {
         file { $vhost['docroot']:
@@ -523,10 +516,10 @@ if hash_key_equals($apache_values, 'install', 1) {
       create_resources(apache::vhost, { "${key}" => merge($vhost, {
           'custom_fragment' => template('puphpet/apache/custom_fragment.erb'),
           'ssl'             => 'ssl' in $vhost and str2bool($vhost['ssl']) ? { true => true, default => false },
-          'ssl_cert'        => hash_key_true($vhost, 'ssl_cert') ? { true => $vhost['ssl_cert'],      default => undef },
-          'ssl_key'         => hash_key_true($vhost, 'ssl_cert') ? { true => $vhost['ssl_key'],       default => undef },
-          'ssl_chain'       => hash_key_true($vhost, 'ssl_cert') ? { true => $vhost['ssl_chain'],     default => undef },
-          'ssl_certs_dir'   => hash_key_true($vhost, 'ssl_cert') ? { true => $vhost['ssl_certs_dir'], default => undef }
+          'ssl_cert'        => hash_key_true($vhost, 'ssl_cert')      ? { true => $vhost['ssl_cert'],      default => undef },
+          'ssl_key'         => hash_key_true($vhost, 'ssl_key')       ? { true => $vhost['ssl_key'],       default => undef },
+          'ssl_chain'       => hash_key_true($vhost, 'ssl_chain')     ? { true => $vhost['ssl_chain'],     default => undef },
+          'ssl_certs_dir'   => hash_key_true($vhost, 'ssl_certs_dir') ? { true => $vhost['ssl_certs_dir'], default => undef }
         })
       })
 
@@ -585,33 +578,25 @@ if hash_key_equals($nginx_values, 'install', 1) {
     }
   }
 
-  $webroot_location = $puphpet::params::nginx_webroot_location
+  $webroot_location     = $puphpet::params::nginx_webroot_location
+  $nginx_provider_types = ['virtualbox', 'vmware_fusion', 'vmware_desktop', 'parallels']
 
   exec { "exec mkdir -p ${webroot_location}":
     command => "mkdir -p ${webroot_location}",
     creates => $webroot_location,
   }
 
-  if (downcase($::provisioner_type) in ['virtualbox', 'vmware_fusion'])
-    and ! defined(File[$webroot_location])
-  {
+  if (downcase($::provisioner_type) in $nginx_provider_types) and ! defined(File[$webroot_location]) {
     file { $webroot_location:
       ensure  => directory,
       mode    => 0775,
-      require => [
-        Exec["exec mkdir -p ${webroot_location}"],
-        Group['www-data']
-      ]
+      require => Exec["exec mkdir -p ${webroot_location}"],
     }
-  }
-
-  if !(downcase($::provisioner_type) in ['virtualbox', 'vmware_fusion'])
-    and ! defined(File[$webroot_location])
-  {
+  } elsif ! (downcase($::provisioner_type) in $nginx_provider_types) and ! defined(File[$webroot_location]) {
     file { $webroot_location:
       ensure  => directory,
-      group   => 'www-data',
       mode    => 0775,
+      group   => 'www-data',
       require => [
         Exec["exec mkdir -p ${webroot_location}"],
         Group['www-data']
@@ -633,12 +618,10 @@ if hash_key_equals($nginx_values, 'install', 1) {
   if hash_key_equals($php_values, 'install', 1) {
     $php5_fpm_sock = '/var/run/php5-fpm.sock'
 
-    if $php_values['version'] == undef {
-      $fastcgi_pass = null
-    } elsif $php_values['version'] == '53' {
-      $fastcgi_pass = '127.0.0.1:9000'
-    } else {
-      $fastcgi_pass = "unix:${php5_fpm_sock}"
+    $fastcgi_pass = $php_values['version'] ? {
+      '53'    => '127.0.0.1:9000',
+      undef   => null,
+      default => "unix:${php5_fpm_sock}"
     }
 
     if $::osfamily == 'redhat' and $fastcgi_pass == "unix:${php5_fpm_sock}" {
@@ -648,7 +631,7 @@ if hash_key_equals($nginx_values, 'install', 1) {
         require => Package['nginx'],
       }
 
-      exec { "listen = 127.0.0.1:9000 => listen = ${php5_fpm_sock}":
+      exec { "'listen = 127.0.0.1:9000' => 'listen = ${php5_fpm_sock}'":
         command => "perl -p -i -e 's#listen = 127.0.0.1:9000#listen = ${php5_fpm_sock}#gi' /etc/php-fpm.d/www.conf",
         unless  => "grep -c 'listen = 127.0.0.1:9000' '${php5_fpm_sock}'",
         notify  => [
@@ -658,19 +641,19 @@ if hash_key_equals($nginx_values, 'install', 1) {
         require => Exec["create ${php5_fpm_sock} file"]
       }
 
-      set_php5_fpm_sock_group_and_user { 'php_rhel':
+      set_nginx_php5_fpm_sock_group_and_user { 'php_rhel':
         require => Exec["create ${php5_fpm_sock} file"],
       }
     } else {
-      set_php5_fpm_sock_group_and_user { 'php':
+      set_nginx_php5_fpm_sock_group_and_user { 'php':
         require   => Package['nginx'],
         subscribe => Service['php5-fpm'],
       }
     }
   } elsif hash_key_equals($hhvm_values, 'install', 1) {
-    $fastcgi_pass        = '127.0.0.1:9000'
+    $fastcgi_pass = '127.0.0.1:9000'
   } else {
-    $fastcgi_pass        = ''
+    $fastcgi_pass = null
   }
 
   class { 'nginx': }
@@ -746,41 +729,12 @@ define nginx_vhost (
     $fastcgi_param_parts = []
   }
 
-  if $ssl == 0 or $ssl == false or $ssl == '' {
-    $ssl_set = false
-  } else {
-    $ssl_set = true
-  }
-
-  if $ssl_cert == 0 or $ssl_cert == false or $ssl_cert == '' {
-    $ssl_cert_set = $puphpet::params::ssl_cert_location
-  } else {
-    $ssl_cert_set = $ssl_cert
-  }
-
-  if $ssl_key == 0 or $ssl_key == false or $ssl_key == '' {
-    $ssl_key_set = $puphpet::params::ssl_key_location
-  } else {
-    $ssl_key_set = $ssl_key
-  }
-
-  if $ssl_port == 0 or $ssl_port == false or $ssl_port == '' {
-    $ssl_port_set = '443'
-  } else {
-    $ssl_port_set = $ssl_port
-  }
-
-  if $rewrite_to_https == 0 or $rewrite_to_https == false or $rewrite_to_https == '' {
-    $rewrite_to_https_set = false
-  } else {
-    $rewrite_to_https_set = true
-  }
-
-  if $spdy == off or $spdy == 0 or $spdy == false or $spdy == '' {
-    $spdy_set = off
-  } else {
-    $spdy_set = on
-  }
+  $ssl_set              = value_true($ssl)              ? { true => true,      default => false, }
+  $ssl_cert_set         = value_true($ssl_cert)         ? { true => $ssl_cert, default => $puphpet::params::ssl_cert_location, }
+  $ssl_key_set          = value_true($ssl_key)          ? { true => $ssl_key,  default => $puphpet::params::ssl_key_location, }
+  $ssl_port_set         = value_true($ssl_port)         ? { true => $ssl_port, default => '443', }
+  $rewrite_to_https_set = value_true($rewrite_to_https) ? { true => true,      default => false, }
+  $spdy_set             = value_true($spdy)             ? { true => on,        default => off, }
 
   nginx::resource::vhost { $server_name:
     server_name      => $merged_server_name,
@@ -801,6 +755,19 @@ define nginx_vhost (
 
   $fastcgi_param = concat($fastcgi_param_parts, $envvars)
 
+  $fastcgi_pass_hash = fastcgi_pass ? {
+    null    => {},
+    ''      => {},
+    default => {'fastcgi_pass' => $fastcgi_pass},
+  }
+
+  $location_cfg_append = merge({
+    'fastcgi_split_path_info' => '^(.+\.php)(/.+)$',
+    'fastcgi_param'           => $fastcgi_param,
+    'fastcgi_index'           => 'index.php',
+    'include'                 => 'fastcgi_params'
+  }, $fastcgi_pass_hash)
+
   nginx::resource::location { "${server_name}-php":
     ensure              => present,
     vhost               => $server_name,
@@ -809,20 +776,17 @@ define nginx_vhost (
     try_files           => ['$uri', '$uri/', "/${try_files}?\$args"],
     ssl                 => $ssl_set,
     www_root            => $www_root,
-    location_cfg_append => {
-      'fastcgi_split_path_info' => '^(.+\.php)(/.+)$',
-      'fastcgi_param'           => $fastcgi_param,
-      'fastcgi_pass'            => $fastcgi_pass,
-      'fastcgi_index'           => 'index.php',
-      'include'                 => 'fastcgi_params'
-    },
+    location_cfg_append => $location_cfg_append,
     notify              => Class['nginx::service'],
   }
 }
 
-define set_php5_fpm_sock_group_and_user (){
+define set_nginx_php5_fpm_sock_group_and_user () {
   exec { 'set php5_fpm_sock group and user':
-    command => "chmod 660 ${php5_fpm_sock} && chown www-data ${php5_fpm_sock} && chgrp www-data ${php5_fpm_sock} && touch /.puphpet-stuff/php5_fpm_sock",
+    command => "chmod 660 ${php5_fpm_sock} && \
+                chown www-data ${php5_fpm_sock} && \
+                chgrp www-data ${php5_fpm_sock} && \
+                touch /.puphpet-stuff/php5_fpm_sock",
     creates => '/.puphpet-stuff/php5_fpm_sock',
   }
 }
@@ -1520,6 +1484,102 @@ define mariadb_nginx_default_conf (
   class { 'puphpet::nginx':
     fastcgi_pass => $fastcgi_pass,
     notify       => Class['nginx::service'],
+  }
+}
+
+## Begin SQLite manifest
+
+if $sqlite_values == undef {
+  $sqlite_values = hiera('sqlite', false)
+} if $php_values == undef {
+  $php_values = hiera('php', false)
+} if $apache_values == undef {
+  $apache_values = hiera('apache', false)
+} if $nginx_values == undef {
+  $nginx_values = hiera('nginx', false)
+} if $mailcatcher_values == undef {
+  $mailcatcher_values = hiera('mailcatcher', false)
+}
+
+if hash_key_equals($sqlite_values, 'install', 1) {
+  if hash_key_equals($php_values, 'install', 1) {
+    $sqlite_php_installed = true
+    $sqlite_php_package   = 'php'
+  } elsif hash_key_equals($hhvm_values, 'install', 1) {
+    $sqlite_php_installed = true
+    $sqlite_php_package   = 'hhvm'
+  } else {
+    $sqlite_php_installed = false
+  }
+
+  # puppet manifests for mailcatcher and sqlite are not compatible.
+  if hash_key_equals($mailcatcher_values, 'install', 0) {
+    class { 'sqlite': }
+  }
+
+  if is_hash($sqlite_values['databases']) and count($sqlite_values['databases']) > 0 {
+    create_resources(sqlite_db, $sqlite_values['databases'])
+  }
+
+  if $sqlite_php_installed and $sqlite_php_package == 'php' and ! defined(Php::Module['sqlite']) {
+    php::module { 'sqlite':
+      service_autorestart => true,
+    }
+  }
+
+  if hash_key_equals($sqlite_values, 'adminer', 1) and $sqlite_php_installed {
+    if hash_key_equals($apache_values, 'install', 1) {
+      $sqlite_adminer_webroot_location = $puphpet::params::apache_webroot_location
+    } elsif hash_key_equals($nginx_values, 'install', 1) {
+      $sqlite_adminer_webroot_location = $puphpet::params::nginx_webroot_location
+    } else {
+      $sqlite_adminer_webroot_location = $puphpet::params::apache_webroot_location
+    }
+
+    class { 'puphpet::adminer':
+      location    => "${sqlite_adminer_webroot_location}/adminer",
+      owner       => 'www-data',
+      php_package => $sqlite_php_package
+    }
+  }
+}
+
+define sqlite_db (
+  $name,
+  $owner,
+  $group = 0,
+  $mode = 0775,
+  $sql_file = false
+) {
+  if $name == '' or $owner == '' or $mode == '' {
+    fail( 'SQLite requires that name, owner, group, and mode be set. Please check your settings!' )
+  }
+
+  # ensure user and directory created
+  user { $owner:
+    ensure => present,
+    groups => $owner
+  }->
+  file { '/var/lib/sqlite':
+    ensure => directory,
+    owner  => $owner,
+    group  => $group,
+    mode   => 0775
+  }->
+  sqlite::db { $name:
+    owner => $owner,
+    group => $group,
+    mode  => $mode
+  }
+
+  if $sql_file {
+    exec{ "${name}-import":
+      command     => "cat ${sql_file} | sudo sqlite3 /var/lib/sqlite/${name}.db",
+      logoutput   => true,
+      refreshonly => $refresh,
+      require     => Sqlite::Db[$name],
+      onlyif      => "test -f ${sql_file}"
+    }
   }
 }
 
